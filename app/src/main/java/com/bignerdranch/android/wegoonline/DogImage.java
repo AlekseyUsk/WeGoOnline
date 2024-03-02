@@ -1,13 +1,11 @@
 package com.bignerdranch.android.wegoonline;
 
-import androidx.annotation.NonNull;
-
-public class Dogs {
+public class DogImage {
 
     private String message;
     private String status;
 
-    public Dogs(String message, String status) {
+    public DogImage(String message, String status) {
         this.message = message;
         this.status = status;
     }
