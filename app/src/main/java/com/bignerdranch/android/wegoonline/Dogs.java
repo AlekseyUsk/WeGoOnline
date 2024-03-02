@@ -1,5 +1,7 @@
 package com.bignerdranch.android.wegoonline;
 
+import androidx.annotation.NonNull;
+
 public class Dogs {
 
     private String message;
@@ -16,5 +18,13 @@ public class Dogs {
 
     public String getStatus() {
         return status;
+    }
+
+    @Override
+    public String toString() {
+        return "Dogs{" +
+                "message='" + message + '\'' +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

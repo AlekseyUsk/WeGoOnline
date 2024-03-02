@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,9 +36,24 @@ public class MainActivity extends AppCompatActivity {
                     InputStream inputStream = httpURLConnection.getInputStream();                   /**чтение данных по байтово*/
                     InputStreamReader inputStreamReader = new InputStreamReader(inputStream);       /**чтение данных по символам*/
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);          /**оболочка над InputStreamReader чтение целыми строками */
-                    String result = bufferedReader.readLine();                                      /**считал ответ сервера и вывел в LOG*/
 
-                    Log.d("MainActivity", result);
+                    StringBuilder data = new StringBuilder();
+                    String result;
+
+                    do {
+                        result = bufferedReader.readLine();
+                        if (result != null) {
+                            data.append(result);
+                        }
+                    } while (result != null);
+
+                    JSONObject jsonObject = new JSONObject(data.toString());                        /**создал обьект Json для преобразования полученных данных из интернета*/
+                    String message = jsonObject.getString("message");                         /**по ключу из данных из интернета там указанго было ("message") я получил данные;*/
+                    String status = jsonObject.getString("status");                           /**то же самое*/
+                    Dogs dogImage = new Dogs(message, status);                                      /**передал обьекту класса полученные данные*/
+
+                    Log.d("MainActivity", dogImage.toString()                                   /**вывел в логи заранее переопределив toString в классе Dogs*/
+                    );
                 } catch (Exception e) {
                     Log.d("MainActivity", e.toString());
                 }
