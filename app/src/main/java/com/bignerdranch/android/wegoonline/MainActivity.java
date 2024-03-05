@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -28,9 +29,34 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initViews();
+        onClick();
+        observerViewSModel();
 
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         viewModel.loadDogImage();
+
+    }
+
+    private void observerViewSModel() {
+        viewModel.getDogImage().observe(this, new Observer<DogImage>() {
+            @Override
+            public void onChanged(DogImage dogImage) {
+                Glide.with(MainActivity.this)
+                        .load(dogImage.getMessage())
+                        .into(imageActivity);
+            }
+        });
+
+        viewModel.getIsError().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isError) {
+                if (isError) {
+                    Toast.makeText(
+                                    MainActivity.this, "ОШИБКА ЗАГРУЗКИ", Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+        });
 
         viewModel.getIsLoading().observe(this, new Observer<Boolean>() {
             @Override
@@ -43,15 +69,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        viewModel.getDogImage().observe(this, new Observer<DogImage>() {
-            @Override
-            public void onChanged(DogImage dogImage) {
-                Glide.with(MainActivity.this)
-                        .load(dogImage.getMessage())
-                        .into(imageActivity);
-            }
-        });
+    }
 
+    private void onClick() {
         btnActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void initViews() {
         btnActivity = findViewById(R.id.btnActivity);

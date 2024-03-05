@@ -21,6 +21,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -45,24 +46,48 @@ public class MainViewModel extends AndroidViewModel {
 
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
 
+    public LiveData<Boolean> getIsError() {
+        return isError;
+    }
+
+    private final MutableLiveData<Boolean> isError = new MutableLiveData<>();
+
     public MainViewModel(@NonNull Application application) {
         super(application);
     }
 
     public void loadDogImage() {
-        isLoading.setValue(true);
-        Disposable disposable = loadImageRxJava().subscribeOn(Schedulers.io())
+        Disposable disposable = loadImageRxJava()
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+
+                .doOnSubscribe(new Consumer<Disposable>() { // ПРИ ЗАГРУЗКЕ
+                    @Override
+                    public void accept(Disposable disposable) throws Throwable {
+                        isLoading.setValue(true);
+                    }
+                })
+                .doOnError(new Consumer<Throwable>() {     // ПРИ ОШИБКИ В ЗАГРУЗКЕ
+                    @Override
+                    public void accept(Throwable throwable) throws Throwable {
+                        isError.setValue(true);
+                    }
+                })
+
+                .doAfterTerminate(new Action() {          //ПРИ ОКОНЧАНИИ В ЗАГРУЗКЕ
+                    @Override
+                    public void run() throws Throwable {
+                        isLoading.setValue(false);
+                    }
+                })
                 .subscribe(new Consumer<DogImage>() {
                     @Override
                     public void accept(DogImage image) throws Throwable {
-                        isLoading.setValue(false);
                         dogImage.setValue(image);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Throwable {
-                        isLoading.setValue(false);
                         Log.d(TAG, "error :" + throwable.getMessage());
                     }
                 });
