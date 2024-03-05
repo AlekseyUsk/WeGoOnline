@@ -8,14 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.concurrent.Callable;
+import com.bignerdranch.android.wegoonline.retrofit.ApiFactory;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
@@ -94,37 +87,8 @@ public class MainViewModel extends AndroidViewModel {
         compositeDisposable.add(disposable);
     }
 
-    /**
-     * RxJava - создаю Single так как надо вернуть обьект<DogImage> данные пожтому создаю метод loadImageRxJava()
-     * этот метод выполнит все необходимые загрузки и вернет оьект DogImage
-     */
     private Single<DogImage> loadImageRxJava() {
-        return Single.fromCallable(new Callable<DogImage>() {
-            @Override
-            public DogImage call() throws Exception {
-
-                URL url = new URL(BASE_URL);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-                StringBuilder data = new StringBuilder();
-                String result;
-
-                do {
-                    result = bufferedReader.readLine();
-                    if (result != null) {
-                        data.append(result);
-                    }
-                } while (result != null);
-
-                JSONObject jsonObject = new JSONObject(data.toString());
-                String message = jsonObject.getString(MESSAGE_KEY);
-                String status = jsonObject.getString(STATUS_KEY);
-                return new DogImage(message, status);
-            }
-        });
+        return ApiFactory.getApiService().loadDogImage();
     }
 
     @Override
