@@ -1,7 +1,7 @@
 package com.bignerdranch.android.wegoonline;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -11,14 +11,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
-
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,15 +32,34 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         viewModel.loadDogImage();
 
+        viewModel.getIsLoading().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean loading) {
+                if (loading) {
+                    progressBar.setVisibility(View.VISIBLE);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
+
         viewModel.getDogImage().observe(this, new Observer<DogImage>() {
             @Override
             public void onChanged(DogImage dogImage) {
                 Glide.with(MainActivity.this)
-                        .load(dogImage.getMessage())//загружаем из ссылки картинку
-                        .into(imageActivity);       //указываем где отобразить картинку
+                        .load(dogImage.getMessage())
+                        .into(imageActivity);
+            }
+        });
+
+        btnActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewModel.loadDogImage();
             }
         });
     }
+
 
     private void initViews() {
         btnActivity = findViewById(R.id.btnActivity);
